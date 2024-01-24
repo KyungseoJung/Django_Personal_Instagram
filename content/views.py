@@ -24,9 +24,10 @@ class Main(APIView):
         # print(feed_list)  #@ 그냥 통째로 출력한 예
 
         #//@8 세션 정보 가져와서 확인하기
-        print('로그인한 사용자: ', request.session['email'])
-
-        email = request.session['email']
+        # print('로그인한 사용자: ', request.session['email']) # //#9 있으면 에러 발생하므로
+        # email = request.session['email']
+        # //#9 위 코드: email이 없으면 에러가 나게 되어있으므로, 아래 코드로 변경
+        email = request.session.get('email', None)  # //#9 없으면 에러가 나는 게 아니라, None으로 받도록 변경
 
         if email is None:
             return render(request, "user/login.html")   # //@8 유저 이메일 없으면, 로그인부터 하도록 로그인 화면 띄워

@@ -53,3 +53,12 @@ class Login(APIView):
             return Response(status=400, data=dict(message="회원정보가 잘못되었습니다."))
 
         # pass
+
+
+# //#9 로그아웃 함수 설정
+class LogOut(APIView):
+    def get(self, request):
+        # //#9 세션 지운 후, 로그인 화면 넘어가기
+        request.session.flush()
+        return render(request, "user/login.html")
+
