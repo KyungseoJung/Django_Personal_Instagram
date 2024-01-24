@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    {#    <title>Bootstrap demo</title>#}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <!-- jQuery(제이쿼리) 사용 선언 -->
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <title> 회원 가입 </title>
+
+</head>
+
+{#  //@7 회원가입 및 로그인 페이지 만들기 #}
+
+<body style="background: whitesmoke">
+
+{#    <h1>회원가입 페이지</h1>#}
+
+<div style="display:flex; flex-direction: column; align-items: center; width:100%">
+    {#//@7 데이터 입력창 #}
+    <div style="padding: 20px; text-align: center; border: solid 3px rgba(219, 219, 219, 1); width:300px; height: 530px; margin-top: 30px; background: white">
+        <div style="padding-bottom: 10px"><img style="width: 200px"
+                                               src="https://i.namu.wiki/i/r8vqJ0mgCXLPUmIO-KT72YEPAuz52jEf7bzAvxmR0WnLvnOXpcNKgQ7sLx_VXskZDf5oAsHnwZBwQX96tKbeXtS-q4tYK9o3tZ6Fd0A5B70InSzfCYLuujRO2cwYpGjogDlR7NOPPLhYp7BaxPiAyw.svg">
+        </div>
+        <div style="font-weight: bold; color: gray; padding-bottom: 20px"> 친구들의 사진과 동영상을 보려면 가입하세요.</div>
+        <div>
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" style="font-size: 14px; height: 14px" id="input_email"
+                placeholder="name@example.com">
+                <label for="input_email" style="font-size: 14px; padding: 8px 13px ">이메일 주소</label>
+                {# //@8 아이디 및 for 뒤에 오는 거 변경: floatingInput-> input_email #}
+            </div>
+        </div>
+        <div>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" style="font-size: 14px; height: 14px" id="input_name"
+                placeholder="name@example.com">
+                <label for="input_name" style="font-size: 14px; padding: 4px 10px ">이름</label>
+            </div>
+        </div>
+        <div>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" style="font-size: 14px; height: 14px" id="input_nickname"
+                placeholder="name@example.com">
+                <label for="input_nickname" style="font-size: 14px; padding: 4px 10px ">닉네임</label>
+            </div>
+        </div>
+        <div>
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" style="font-size: 14px; height: 14px" id="input_password"
+                placeholder="name@example.com">
+                <label for="input_password" style="font-size: 14px; padding: 4px 10px ">비밀번호</label>
+            </div>
+        </div>
+
+        <button id = "join_button" class="btn btn-primary" style="width: 100%"> 가입</button>
+
+    </div>
+
+    {#//@7 계정 로그인 버튼#}
+    <div style="padding: 20px; text-align: center; border: solid 3px rgba(219, 219, 219, 1); width:300px; height: 70px; margin-top: 30px; background: white">
+        <div> 계정이 있으신가요? <a href="login">로그인</a></div>
+    </div>
+</div>
+
+
+<!-- Optional JavaScript; choose one of the two! -->
+{#//@8 ajax 코드 복붙 - 예전 main.html에서 했던 코드('#feed_create_button')에서 가져옴 #}
+
+<script>
+    $('#join_button').click(function () {
+
+        let email = $('#input_email').val(); <!--내가 쓴 텍스트 값 따오기-->
+        let password = $('#input_password').val(); <!--내가 쓴 텍스트 값 따오기-->
+        let nickname = $('#input_nickname').val(); <!--내가 쓴 텍스트 값 따오기-->
+        let name = $('#input_name').val(); <!--내가 쓴 텍스트 값 따오기-->
+
+        console.log(email, password, nickname, name);
+
+
+{#//@6 서버로 보내기#}
+
+{# main.html에서의 #feed_create_button 에서는 파일을 올려야 해서 FormData()이용 #}
+{# 회원가입은 string 데이터만 올릴 것이기 때문에, JSON을 이용할 것 #}
+
+        $.ajax({
+            url: "/user/join",
+            {# //@8 JSON으로 올릴 것이기 때문에, {중괄호}해서 넣어도 됨 #}
+            {# //@8 Key - Value 식으로 입력한 데이터(Value)들을 Key값에 넣기 #}
+            data: {
+                email : email,
+                password: password,
+                nickname: nickname,
+                name: name
+            },
+            method: "POST",
+            {#processData: false,#}
+            {#dataType: "json", #}
+{#어차피 회원가입 할 땐, 데이터를 받을 필요가 없으니까 위 코드 지우기 #}
+
+             {#콜백함수에 따라 실행되는 로그창 설정#}
+             {#콜백함수: 따로 실행하지 않아도, 상태에 따라 트리거가 발동돼서 자동으로 실행되는 함수#}
+            success: function (data) {
+                console.log("성공");
+                alert("회원가입 성공했습니다. 로그인해주세요.");
+                location.replace('/user/login')
+            },
+            error: function (request, status, error) {
+                console.log("에러");
+            },
+            complete: function () {
+                console.log("완료");
+            }
+        });
+    });
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+</body>
+</html>
