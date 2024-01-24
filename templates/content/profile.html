@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {#    //@6 {% get_media_prefix %} 할 때, 에러 해결#}
+    {% load static %}
+    <title>Bootstrap demo</title>
+
+    <!-- Bootsgrap CSS(부트스트랩) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <!-- Google Icon -->
+    <!-- 요기에 구글 머티리얼 아이콘 -->
+    {# @ 구글 아이콘 사용하겠다 선언 #}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+    <!-- jQuery(제이쿼리) 사용 선언 -->
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <title> Hello, world! </title>
+
+    {#     @이미지 동그랗게 가져오기 위해 클래스를 선언하는 것#}
+    {#    정해진 스타일을 box라는 이름으로 정의해서 주구장창 사용하는 것 #}
+    <style>
+        .feed_box {
+            background-color: white;
+            width: 480px;
+            margin: 10px;
+            min-height: auto;
+            padding-bottom: 10px;
+        }
+
+        .box {
+            width: 150px;
+            height: 150px;
+            border-radius: 70%;
+            overflow: hidden;
+        }
+
+        .profile {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        {#input:focus {outline: none; box-shadow: none} /* outline 테두리 없애기 */#}
+
+        {# //@5 정의한 클래스 사용하기 위해 CSS 정의하기 #}
+        .modal_overlay {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: none;
+        <!-- flex 처리하면 보이고, none 처리하면 안 보임 --> flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(1.5px);
+            -webkit-backdrop-filter: blur(1.5px);
+        }
+
+        .modal_window {
+            background: white;
+            backdrop-filter: blur(13.5px);
+            -webkit-backdrop-filter: blur(13.5px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 800px;
+            height: 600px;
+            position: relative;
+            padding: 10px;
+        }
+    </style>
+
+</head>
+<body>
+
+{# //@8 세션정보로부터 사용자 정보 잘 가져왔는지 확인하기-> 확인 완료 #}
+{#<div>#}
+{#    {{  user.email }}#}
+{#    {{  user.nickname }}#}
+{#    {{  user.name }}#}
+{#    {{  user.profile_image }}#}
+{#</div>#}
+
+
+{# @ content\views.py 에서 feeds를 가져오는 연습 #}
+{# @각각의 피드에서 글 내용, 사용자 이름, 좋아요 수를 가져와서 찍는 것 #}
+{#<div>#}
+{#    {% for feed in feeds %}#}
+{#        <p> {{ feed.content }}</p>#}
+{#        <p> {{ feed.user_id }}</p>#}
+{#        <p> {{ feed.like_count }}</p>#}
+{#    {%  endfor %}#}
+{#</div>#}
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary" style="position: fixed; width:100%">
+
+
+    <div class="container-fluid" style="justify-content: space-between; flex-wrap: nowrap; min-width: 1000px">
+        {# @인스타그램 마크 이미지 #}
+        <a class="navbar-brand" href="#"><img style="width: 200px"
+                                              src="https://i.namu.wiki/i/5LQJVLwN6u1raKChKkUYUiUnvRr_yOl9wpUZsBjOwxV3u6Zx7alrnO-UI3ZZVYtyl65cVA-CLAWlbDM5d8OaEQF8-F5yuKZWgUFceqPJ_gy_3N_kekgfp6b520wi6t9QTcNi3mX103jadHYh1kWjtA.svg"></a>
+
+        {# @검색창 #}
+        {#      <form class="d-flex" role="search">#}
+        <input class="form-control me-2" style="width:400px" type="search" placeholder="Search" aria-label="Search">
+        {#    <button class="btn btn-outline-success" type="submit">Search</button>#}
+        {#      </form>#}
+        <div style="display: flex">
+            {#아이콘들 넣기#}
+            <span class="material-symbols-outlined" style="padding-right: 10px">home</span>
+            {# <span class="material-symbols-outlined">send</span>#}
+            <span id="nav_bar_add_box" class="material-symbols-outlined" style="padding-right: 10px">add_box</span>
+            {# <span class="material-symbols-outlined">explore</span>#}
+            {# <span class="material-symbols-outlined">favorite</span>#}
+
+
+            {# //@9 내 프로필 들어가는 버튼 만들기 #}
+            <div class="dropdown">
+                <a href="#" role="button" id="dropdownMenuLink"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+
+                    <div class="box" style="width: 25px; height: 25px">
+                        <img class="profile"
+                             src="https://pbs.twimg.com/media/E9s0Z08UYAIxtI7.jpg:large">
+                    </div>
+
+                </a>
+
+                <ul class="dropdown-menu" style="left:-158px">
+                    <li><a class="dropdown-item" href="#">프로필</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li><a class="dropdown-item" href="user/logout">로그아웃</a></li>
+                    {# //#9 로그아웃 logout 화면으로 넘어가도록 - get으로 넘기면 로그아웃 시키기 #}
+                </ul>
+            </div>
+        </div>
+
+
+    </div>
+</nav>
+
+{#@ 구역 나눔#}
+<div style="display: flex; flex-direction: row; text-align: center; justify-content: center; padding-top: 100px; background: white">
+    <div style="padding: 20px 60px">
+        <div class="box" style="width: 175px; height: 175px">
+            <img class="profile"
+                 src="https://pbs.twimg.com/media/E9s0Z08UYAIxtI7.jpg:large">
+        </div>
+    </div>
+    <div style="text-align: left">
+        <div style="display: flex; flex-direction: row; margin: 20px 0">
+            <div style="font-size: 26px; margin-right: 40px">
+                {{ user.nickname }}
+            </div>
+            <button style="margin-right: 40px"> 프로필 편집</button>
+            <span class="material-symbols-outlined" style="margin-right: 40px">settings</span>
+        </div>
+
+        <div style="margin-bottom: 20px">
+            게시물 내 게시물 건수 팔로워 111 팔로잉 111
+        </div>
+        <div>
+            <b> {{ user.name }} </b>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- //@5 모달 만들기 - 평소엔 숨어있음 -->
+
+<!-- 1번째 모달 -->
+<div id="first_modal" class="modal_overlay">
+    <div class="modal_window">
+        <div style="display: flex; flex-direction: row; justify-content: space-between">
+            {# 이미지 업로드 박스를 가운데에 두기 위해서 3조각으로 나눈 것 #}
+            <div style="width: 40px; background: gray">
+                {#앞부분#}
+            </div>
+
+            <div>
+                새 이미지 업로드
+            </div>
+
+            <div style="width: 40px; background: gray">
+                {#뒷부분#}
+                <span class="material-symbols-outlined">close</span>
+            </div>
+        </div>
+
+        <div class="img_upload_space" style="border-top: solid 1px gray; width: 778px; height: 540px; margin-top: 10px">
+
+        </div>
+    </div>
+</div>
+
+<!-- 2번째 모달 -->
+<div id="second_modal" class="modal_overlay">
+    <div class="modal_window">
+        <div style="display: flex; flex-direction: row; justify-content: space-between">
+            {# 이미지 업로드 박스를 가운데에 두기 위해서 3조각으로 나눈 것 #}
+            <div style="width: 40px; background: gray">
+                {#앞부분#}
+            </div>
+
+            <div>
+                새 이미지 업로드
+            </div>
+
+            <div style="width: 40px; background: gray">
+                {#뒷부분#}
+                <span class="material-symbols-outlined">close</span>
+            </div>
+        </div>
+
+        <div style="border-top: solid 1px gray; display: flex; flex-direction: row; margin-top: 10px">
+            <div class="img_upload_space" style="width: 500px; height: 540px">
+
+            </div>
+            <div>
+                <div style="border-left: solid 1px gray">
+                    <textarea id="input_feed_content" class="form-control" style="width: 276px; height: 400px"
+                              id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+                <button id="feed_create_button" type="button" class="btn btn-primary" style="width: 100%">
+                    공유하기
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- 자바스크립트 -->
+{#//@5 제이쿼리 #}
+<script>
+
+    let files;  <!--//@6 전역변수 선언. 이제 제이쿼리 스크립트 내 어디서든 사용 가능-->
+    {#let: 변수의 개념. 한번 선언 후 변경 가능 #}
+    {#const: 사웃의 개념. 한번 선언 후 변경 불가능 #}
+
+    {# 달러($) 표시로 객체를 불러온다. #}
+    {#  클래스 이름 적을 땐, 앞에 점(.)  #}
+    {#  id 적을 땐, 앞에 샵(#)  #}
+
+
+    {# -> So, 클래스는 같은 경우가 많기 때문에, 중복돼서 실행됨. 하나씩만 나눠서 실행하고 싶다면, id를 부여해서 함수를 부여하자#}
+    {#    $('.material-symbols-outlined').click(function(){#}
+    {#        alert("아이콘을 클릭했습니다.");#}
+    {#    })#}
+
+    $('#nav_bar_add_box').click(function () {
+        {#alert("add_box를 눌렀습니다.");#}
+        $('#first_modal').css({
+            display: 'flex',
+        });
+
+        $(document.body).css({
+            overflow: 'hidden'
+        });
+    })
+
+    $('#feed_create_button').click(function () {
+        alert("공유하기 눌렀다. 파일명: ");
+
+        let file = files[0];    <!--//@6 어차피 우리는 파일 하나만 올릴 거니까, files -> files[0]으로 변경-->
+        let image = files[0].name;
+        let content = $('#input_feed_content').val(); <!--내가 쓴 텍스트 값 따오기-->
+        let user_id = "kyung.00";
+        let profile_image = "https://pbs.twimg.com/media/E9s0Z08UYAIxtI7.jpg:large";
+
+        {#//@6 서버로 보내기#}
+
+        {# FormData인 fd(임의로 지은 이름)에 데이터를 모두 넣어 #}
+        let fd = new FormData();
+
+        fd.append('file', file);
+        fd.append('image', image);
+        fd.append('content', content);
+        fd.append('user_id', user_id);
+        fd.append('profile_image', profile_image);
+
+        $.ajax({
+            url: "/content/upload",
+            data: fd,
+            method: "POST",
+            processData: false,
+            contentType: false,
+
+            {# 콜백함수에 따라 실행되는 로그창 설정 #}
+            {# 콜백함수: 따로 실행하지 않아도, 상태에 따라 트리거가 발동돼서 자동으로 실행되는 함수#}
+            success: function (data) {
+                console.log("성공");
+            },
+            error: function (request, status, error) {
+                console.log("에러");
+            },
+            complete: function () {
+                console.log("완료");
+                location.replace("/main");
+                {#//@6 [공유하기] 버튼 누르면 메인 화면으로 돌아가도록#}
+            }
+        });
+    });
+
+
+    $('.img_upload_space')
+        .on("dragover", dragOver)
+        .on("dragleave", dragOver)
+        .on("drop", uploadFiles);
+
+    {# e 역할: 드래그오버 할 때, 이벤트 정보가 e에 담겨져 있음 #}
+
+    function dragOver(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        console.log(e);
+        {# //@5 제이쿼리에서 로그를 출력하는 법 #}
+
+        {# //@5 이미지 놓을 때, 색깔 변하는 효과 #}
+        if (e.type == "dragover") {
+            $(e.target).css({
+                "background-color": "black  ",
+                "outline-offset": "-20px"
+            });
+        } else {
+            $(e.target).css({
+                {#"background-color": "orange",#}
+                "outline-offset": "-10px"
+            });
+        }
+    }
+
+    function uploadFiles(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        {# //@5 이미지 넣어지는 효과 적용 #}
+        {#dragOver(e); //1  // 필요 없을 것 같아서 이 부분은 주석 처리 #}
+
+        e.dataTransfer = e.originalEvent.dataTransfer; //2
+        files = e.target.files || e.dataTransfer.files;
+
+        console.log("뭔가 파일을 올렸당!! " + files[0].name);
+        if (files.length > 1) {
+            alert('하나만 올려라.');
+            return;
+        }
+
+        {# //@ 이미지 드래그 앤 드롭하면, 그대로 화면에도 그 이미지가 나타나도록 #}
+        {# 만약 이미지인 걸 확인했다면 - 브라우저에서 내 이미지의 주소를 그대로 가져와서 보여주기#}
+        if (files[0].type.match(/image.*/)) {
+
+            $('#first_modal').css({
+                display: 'none',
+            });
+
+            $('#second_modal').css({
+                display: 'flex',
+            });
+
+            $('.img_upload_space').css({
+                "background-image": "url(" + window.URL.createObjectURL(files[0]) + ")",
+                "outline": "none",
+                "background-size": "100% 100%",
+                "background-repeat": "no-repeat",
+                "background-position": "center"
+            });
+        } else {
+            alert('이미지가 아닙니다.');
+            return;
+        }
+
+    }
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNoverflow: hidden;o3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

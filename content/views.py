@@ -71,3 +71,21 @@ class UploadFeed(APIView):
         # response: Alt + Enter 눌러서 import하기
         return Response(status=200)
 
+
+# //#9 프로필 화면으로 넘어가는 Profile 클래스 추가
+class Profile(APIView):
+    def get(self, request):
+
+        # //#9 아래처럼 email(사용자 고유 정보)를 불러와야 profile.html에서 {{ user.nickname }} 같은 정보에 접근 가능
+        email = request.session.get('email', None)  # //#9 없으면 에러가 나는 게 아니라, None으로 받도록 변경
+
+        if email is None:
+            return render(request, "user/login.html")   # //@8 유저 이메일 없으면, 로그인부터 하도록 로그인 화면 띄워
+        user = User.objects.filter(email=email).first()     # //@8 고유 데이터인 이메일을 이용해서 로그인 한 사용자의 정보를 가져오기
+
+        if user is None:
+            return render(request, "user/login.html")   # //@8 사용자 정보 없으면, 로그인부터 하도록 로그인 화면 띄워
+
+        # //#9 여기까지 위 email(사용자 공유 정보)를 불러와줘서 아래처럼 context=dict(user=user)를 통해 사용자 정보를 넘기는 것
+
+        return render(request, 'content/profile.html', context=dict(user=user))
