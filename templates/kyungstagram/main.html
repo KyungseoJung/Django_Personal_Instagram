@@ -61,6 +61,7 @@
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(1.5px);
             -webkit-backdrop-filter: blur(1.5px);
+            z-index: 9999;  {# //#9 모달창은 우선순위 가장 높게 #}
         }
 
         .modal_window {
@@ -98,7 +99,8 @@
 {#    {%  endfor %}#}
 {#</div>#}
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary" style="position: fixed; width:100%">
+<nav class="navbar navbar-expand-lg bg-body-tertiary" style="position: fixed; width:100%; z-index: 999">
+{# //#9 네비바 우선순위 설정(z-index) #}
 
 
     <div class="container-fluid" style="justify-content: space-between; flex-wrap: nowrap; min-width: 1000px">
@@ -209,7 +211,9 @@
 
 
     {# 2. 오른쪽 화면 ============== #}
-    <div style="width: 400px; height: 1000px; position: fixed; left:62%">
+    <div style="width: 400px; height: 1000px; position: fixed; left:62%; z-index: 0">
+{# //#9 오른쪽 화면 우선순위 설정(z-index) #}
+
         {# <div> 사용자 - 프로필 </div>#}
         <div style="display: flex; flex-direction: row; align-items: center; margin: 0 20px"> {# @정렬을 하는데, 가로로 하겠다~ #}
             <div class="box" style="width: 70px; height: 70px">
