@@ -1,6 +1,11 @@
+import os   # //#9
+from uuid import uuid4  # //#9
+
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from Kyungstagram.settings import MEDIA_ROOT     # //#9
 from .models import User     # //@8
 from django.contrib.auth.hashers import make_password   #//@8 make_password 함수를 사용하기 위한 임포트
 
@@ -61,4 +66,34 @@ class LogOut(APIView):
         # //#9 세션 지운 후, 로그인 화면 넘어가기
         request.session.flush()
         return render(request, "user/login.html")
+
+
+# //#9 프로필 사진 업로드 함수 설정
+class UploadProfile(APIView):
+    def post(self, request):
+
+        # 일단 파일과 email을 불러와
+        file = request.FILES['file']
+        email = request.data.get('email')
+
+        # //#9 파일의 이름 - 랜덤으로 고유값을 만든 다음, MEDIA_ROOT에 저장
+        uuid_name = uuid4().hex
+        save_path = os.path.join(MEDIA_ROOT, uuid_name)
+
+        # 파일을 저장해 - 파일의 청크를 하나씩 가져와서 - 파일을 만드는 역할
+        with open(save_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+
+        profile_image = uuid_name   # //#9 프로필 이미지 이름으로 저장해
+
+        user = User.objects.filter(email=email).first()
+        # //#9 email 주소를 이용해서 사용자 찾기
+
+        user.profile_image = profile_image
+        user.save()
+        # //#9 사용자를 찾았으니까, 그 사용자의 프로필 이미지에 <- 우리가 저장한 프로필 이미지를 넣어. 그리고 저장
+
+        # response: Alt + Enter 눌러서 import하기
+        return Response(status=200)
 

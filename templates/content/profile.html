@@ -127,7 +127,9 @@
 
                     <div class="box" style="width: 25px; height: 25px">
                         <img class="profile"
-                             src="https://pbs.twimg.com/media/E9s0Z08UYAIxtI7.jpg:large">
+                             src="{% get_media_prefix %}{{ user.profile_image }}">
+        {# // #9 DB에 저장된 유저 profile 정보를 프로필 이미지로 나타나게 하기 #}
+
                     </div>
 
                 </a>
@@ -138,7 +140,7 @@
                         <hr class="dropdown-divider">
                     </li>
 
-                    <li><a class="dropdown-item" href="user/logout">로그아웃</a></li>
+                    <li><a class="dropdown-item" href="/user/logout">로그아웃</a></li>
                     {# //#9 로그아웃 logout 화면으로 넘어가도록 - get으로 넘기면 로그아웃 시키기 #}
                 </ul>
             </div>
@@ -153,7 +155,8 @@
     <div style="padding: 20px 60px">
         <div class="box" style="width: 175px; height: 175px">
             <img class="profile"
-                 src="https://pbs.twimg.com/media/E9s0Z08UYAIxtI7.jpg:large">
+                 src="{% get_media_prefix %}{{ user.profile_image }}">
+        {# // #9 DB에 저장된 유저 profile 정보를 프로필 이미지로 나타나게 하기 #}
         </div>
     </div>
     <div style="text-align: left">
@@ -161,7 +164,12 @@
             <div style="font-size: 26px; margin-right: 40px">
                 {{ user.nickname }}
             </div>
-            <button style="margin-right: 40px"> 프로필 편집</button>
+            <button id="button_profile_upload" style="margin-right: 40px"> 프로필 사진 편집</button>
+            <input type="file" id="input_fileupload" onchange="profile_upload();" style="display: none"/>
+            {# //#9 프로필 이미지 변경 #}
+            {# 파일 선택 버튼이 눈에 보이지 않도록 - 그냥 '프로필 사진 편집' 버튼만 누르면 자동으로 파일 선택 창이 나타나도록 #}
+            {# (콜백 함수) 특정 이미지 파일이 선택될 때마다 onchange 함수가 실행됨 -> 어떤 것을 작동시키고 싶은지 선택 가능 #}
+
             <span class="material-symbols-outlined" style="margin-right: 40px">settings</span>
         </div>
 
@@ -246,7 +254,8 @@
 {#//@5 제이쿼리 #}
 <script>
 
-    let files;  <!--//@6 전역변수 선언. 이제 제이쿼리 스크립트 내 어디서든 사용 가능-->
+    let files;
+    {#<!--//@6 전역변수 선언. 이제 제이쿼리 스크립트 내 어디서든 사용 가능-->#}
     {#let: 변수의 개념. 한번 선언 후 변경 가능 #}
     {#const: 사웃의 개념. 한번 선언 후 변경 불가능 #}
 
@@ -274,7 +283,8 @@
     $('#feed_create_button').click(function () {
         alert("공유하기 눌렀다. 파일명: ");
 
-        let file = files[0];    <!--//@6 어차피 우리는 파일 하나만 올릴 거니까, files -> files[0]으로 변경-->
+        let file = files[0];
+        {#<!--//@6 어차피 우리는 파일 하나만 올릴 거니까, files -> files[0]으로 변경-->#}
         let image = files[0].name;
         let content = $('#input_feed_content').val(); <!--내가 쓴 텍스트 값 따오기-->
         let user_id = "kyung.00";
@@ -384,6 +394,51 @@
         }
 
     }
+
+    {# //#9 버튼 클릭하면 id가 input_fileupload인 것이 실행되도록 #}
+    $('#button_profile_upload').click(function () {
+        $('#input_fileupload').click();
+    });
+
+
+    {#  //#9 (프로필 사진 편집) 버튼을 통해 수정한 프로필 사진이 적용되도록 #}
+    function profile_upload() {
+        let file = $('#input_fileupload')[0].files[0];
+         {#파일 첨부로 선택한 이미지 가져오기 #}
+        {#console.log(file);#}
+
+
+        let email = "{{ user.email }}";
+
+        let fd = new FormData();
+
+        fd.append('file', file);
+        fd.append('email', email);
+
+        $.ajax({
+            url: "/user/profile/upload",
+            data: fd,
+            method: "POST",
+            processData: false,
+            contentType: false,
+
+            {# 콜백함수에 따라 실행되는 로그창 설정 #}
+            {# 콜백함수: 따로 실행하지 않아도, 상태에 따라 트리거가 발동돼서 자동으로 실행되는 함수#}
+            success: function (data) {
+                console.log("성공");
+            },
+            error: function (request, status, error) {
+                console.log("에러");
+            },
+            complete: function () {
+                console.log("완료");
+                location.replace("/content/profile");
+                {#//@6 [프로필 사진 편집] 버튼 누르면 메인 화면으로 돌아가도록#}
+            }
+        });
+    }
+
+
 </script>
 
 
