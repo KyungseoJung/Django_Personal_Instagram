@@ -103,7 +103,7 @@
 
     <div class="container-fluid" style="justify-content: space-between; flex-wrap: nowrap; min-width: 1000px">
         {# @인스타그램 마크 이미지 #}
-        <a class="navbar-brand" href="#"><img style="width: 200px"
+        <a class="navbar-brand" href="main"><img style="width: 200px"
                                               src="https://i.namu.wiki/i/5LQJVLwN6u1raKChKkUYUiUnvRr_yOl9wpUZsBjOwxV3u6Zx7alrnO-UI3ZZVYtyl65cVA-CLAWlbDM5d8OaEQF8-F5yuKZWgUFceqPJ_gy_3N_kekgfp6b520wi6t9QTcNi3mX103jadHYh1kWjtA.svg"></a>
 
         {# @검색창 #}
@@ -113,7 +113,7 @@
         {#      </form>#}
         <div style="display: flex">
             {#아이콘들 넣기#}
-            <span class="material-symbols-outlined" style="padding-right: 10px">home</span>
+            <a href="main" style="color: black"><span class="material-symbols-outlined" style="padding-right: 10px">home</span></a>
             {# <span class="material-symbols-outlined">send</span>#}
             <span id="nav_bar_add_box" class="material-symbols-outlined" style="padding-right: 10px">add_box</span>
             {# <span class="material-symbols-outlined">explore</span>#}
@@ -138,7 +138,7 @@
                         <hr class="dropdown-divider">
                     </li>
 
-                    <li><a class="dropdown-item" href="/user/logout">로그아웃</a></li>   
+                    <li><a class="dropdown-item" href="/user/logout">로그아웃</a></li>
                     {# //#9 로그아웃 logout 화면으로 넘어가도록 - get으로 넘기면 로그아웃 시키기 #}
                 </ul>
             </div>
