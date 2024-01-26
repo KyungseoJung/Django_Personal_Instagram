@@ -3,7 +3,7 @@ from uuid import uuid4
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Feed
+from .models import Feed, Like, Reply, Bookmark  # //#10 Like, Reply, Bookmark 임포트
 # @ 나랑 같은 폴더 내에 있는 models라는 파일(models.py)에서 Feed라는 클래스를 가져오겠다.
 # @ 항상 출처를 분명히 해줘야 함
 from user.models import User  # //@8
@@ -15,8 +15,10 @@ from Kyungstagram.settings import MEDIA_ROOT  # //@6
 
 class Main(APIView):
     def get(self, request):
+
         # print("겟으로 호출")
-        feed_object_list = Feed.objects.all().order_by('-id')  # select * from content_feed; 와 같은 역할을 하는 것-> 그걸 feed_list라는 곳에 받겠다
+        feed_object_list = Feed.objects.all().order_by(
+            '-id')  # select * from content_feed; 와 같은 역할을 하는 것-> 그걸 feed_list라는 곳에 받겠다
         # @ 업데이트 역순으로 가져오기
         # //#10 email을 이용해서만 데이터를 가져오다보니까, 피드를 올릴 때 필요한 데이터(사용자 닉네임, 프로피 이미지)가 없는 상태임
         # So, 위의 feed_list를 feed_object_list라는 이름으로 변경하고, 아래에서 직접 feed_list를 만들어서 데이터를 넣어줄거야.
@@ -25,22 +27,33 @@ class Main(APIView):
         feed_list = []
 
         for feed in feed_object_list:
-            
-            # //#10 아래 user로부터 profile_image, nickname 가져오는 부분 자꾸 에러 발생 - 원인: user를 찾지 못해서
-            # //#10 내 해결책: feed로부터 user를 찾는 게 아니라, 로그인 한 email로부터 user를 찾아서 email 가져오도록 코드 변경함
-            # //#10 변경된 코드 부분: User.objects.filter(email=feed.email).first() -> User.objects.filter(email=email).first()
-            email = request.session.get('email', None) 
-            if email is None:
-                return render(request, "user/login.html")  
-            user = User.objects.filter(email=email).first()  
-            # //#10 사용자 고유 데이터(email)를 이용해서 user에 접근 -> 아래 feed_list.append할 때 nickname, profile_image 가져올 수 있도록
 
+            # //#10-1 아래 user로부터 profile_image, nickname 가져오는 부분 자꾸 에러 발생 - 원인: user를 찾지 못해서
+            # //#10-1 내 해결책: feed로부터 user를 찾는 게 아니라, 로그인 한 email로부터 user를 찾아서 email 가져오도록 코드 변경함
+            # //#10-1 변경된 코드 부분: User.objects.filter(email=feed.email).first() -> User.objects.filter(email=email).first()
+            email = request.session.get('email', None)
+            if email is None:
+                return render(request, "user/login.html")
+            user = User.objects.filter(email=email).first()
+            # //#10-1 사용자 고유 데이터(email)를 이용해서 user에 접근 -> 아래 feed_list.append할 때 nickname, profile_image 가져올 수 있도록
+
+            # //#10-2 답글 데이터에 접근하기
+            # (#10-1에서 했던 것과 같은 방식)
+            # reply_object_list에는 사용자의 닉네임, 프사는 없고, 이메일만 있어 - 그래서 reply_list에 하나씩 append 해주는 것
+            reply_object_list = Reply.objects.filter(feed_id = feed.id)
+            reply_list = []
+            for reply in reply_object_list:
+                user = User.objects.filter(email = reply.email).first()
+                reply_list.append(dict(reply_content = reply.reply_content,
+                                       nickname = user.nickname))
 
             feed_list.append(dict(image=feed.image,
                                   content=feed.content,
                                   like_count=feed.like_count,
-                                  profile_image=user.profile_image,
-                                  nickname=user.nickname
+                                  profile_image=user.profile_image, # //#10-1
+                                  nickname=user.nickname,           # //#10-1
+
+                                  reply_list = reply_list           # //#10-2 답글 데이터도 보이도록
                                   ))
 
         # for feed in feed_list:  #@ 피드 하나씩 출력
@@ -118,3 +131,16 @@ class Profile(APIView):
         # //#9 여기까지 위 email(사용자 공유 정보)를 불러와줘서 아래처럼 context=dict(user=user)를 통해 사용자 정보를 넘기는 것
 
         return render(request, 'content/profile.html', context=dict(user=user))
+
+
+# //#10-2 댓글 달기 클래스
+class UploadReply(APIView):
+    def post(self, request):
+        feed_id = request.session.get('feed_id', None)
+        reply_content = request.data.get('reply_content', None)
+        email = request.session.get('email', None)
+
+        Reply.objects.create(feed_id=feed_id, reply_content=reply_content, email=email)
+
+        return Response(status=200)
+

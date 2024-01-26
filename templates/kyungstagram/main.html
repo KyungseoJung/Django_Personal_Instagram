@@ -131,7 +131,7 @@
 
                     <div class="box" style="width: 25px; height: 25px">
                         <img class="profile"
-                             src="{% get_media_prefix %}{{ user.profile_image }}">  {#  //#9 하드코딩 -> 동적 적용 #}
+                             src="{% get_media_prefix %}{{ user.profile_image }}"> {#  //#9 하드코딩 -> 동적 적용 #}
                     </div>
 
                 </a>
@@ -169,7 +169,7 @@
                     {# @정렬을 하는데, 가로로 하겠다~ #}
                     <div class="box" style="width: 60px; height: 60px">
                         <img class="profile"
-                             src="{% get_media_prefix %}{{ feed.profile_image }}">  {# //#9 프로필 동적 적용되도록 #}
+                             src="{% get_media_prefix %}{{ feed.profile_image }}"> {# //#9 프로필 동적 적용되도록 #}
                     </div>
                     <div>
                         {{ feed.nickname }} {# user_id가 아니라 nickname으로 변경 #}
@@ -197,9 +197,14 @@
                     좋아합니다.
                 </div>
                 <div style="margin: 0 20px; text-align:left; font-size:16px">
-                    <b> {{ feed.user_id }}</b> {{ feed.content }}</div>
-                <div style="margin: 0 20px; text-align:left; font-size:16px"><b>aaaa</b> 나도 강아지 키울래</div>
-                <div style="margin: 0 20px; text-align:left; font-size:16px"><b>bbbb</b> 우리집 강아지가 더 귀여워</div>
+                    <b> {{ feed.user_id }}</b> {{ feed.content }}
+                </div>
+
+                {#  //#10-2 댓글 처리 #}
+                {% for reply in feed.reply_list %}
+                    <div style="margin: 0 20px; text-align:left; font-size:16px"><b>{{ reply.nickname }}</b> {{ reply.reply_content }}</div>
+                {% endfor %}
+                    <div style="margin: 0 20px; text-align:left; font-size:16px"><b>bbbb</b> 우리집 강아지가 더 귀여워</div>
 
                 <div style="border-top:solid 1px gray"><input type="text" class="form-control"
                                                               style="box-shadow: none; border:none; outline: none"
@@ -220,7 +225,7 @@
         <div style="display: flex; flex-direction: row; align-items: center; margin: 0 20px"> {# @정렬을 하는데, 가로로 하겠다~ #}
             <div class="box" style="width: 70px; height: 70px">
                 <img class="profile"
-                     src="{% get_media_prefix %}{{ user.profile_image }}">  {#  //#9 하드코딩 -> 동적 적용 #}
+                     src="{% get_media_prefix %}{{ user.profile_image }}"> {#  //#9 하드코딩 -> 동적 적용 #}
             </div>
             <div style="margin-left: 10px">
                 <div style="font-weight: bold">
@@ -478,8 +483,10 @@
         {#<!--//@6 어차피 우리는 파일 하나만 올릴 거니까, files -> files[0]으로 변경-->#}
         let image = files[0].name;
         let content = $('#input_feed_content').val(); <!--내가 쓴 텍스트 값 따오기-->
-        let user_id = "{{ user.nickname }}";    {#  //#9 하드코딩 -> 동적 적용 #}
-        let profile_image = "{{ user.profile_image }}";    {#  //#9 하드코딩 -> 동적 적용 #}
+
+        {# //#10-2 피드를 올릴 때, 유저 아이디나 프로필 이미지는 이제 필요 없으니까 지움#}
+        {#let user_id = "{{ user.nickname }}";    {#  //#9 하드코딩 -> 동적 적용 #}
+        {#let profile_image = "{{ user.profile_image }}"; {#  //#9 하드코딩 -> 동적 적용 #}
 
         {#//@6 서버로 보내기#}
 
@@ -489,8 +496,10 @@
         fd.append('file', file);
         fd.append('image', image);
         fd.append('content', content);
-        fd.append('user_id', user_id);
-        fd.append('profile_image', profile_image);
+
+        {# //#10-2 피드를 올릴 때, 유저 아이디나 프로필 이미지는 이제 필요 없으니까 지움#}
+        {#fd.append('user_id', user_id);#}
+        {#fd.append('profile_image', profile_image);#}
 
         $.ajax({
             url: "/content/upload",

@@ -300,8 +300,10 @@
         {#<!--//@6 어차피 우리는 파일 하나만 올릴 거니까, files -> files[0]으로 변경-->#}
         let image = files[0].name;
         let content = $('#input_feed_content').val(); <!--내가 쓴 텍스트 값 따오기-->
-        let user_id = "{{ user.nickname }}";   {#  //#9 하드코딩 -> 동적 적용 #}
-        let profile_image = "{{ user.profile_image }}";    {#  //#9 하드코딩 -> 동적 적용 #}
+
+        {# //#10-2 피드를 올릴 때, 유저 아이디나 프로필 이미지는 이제 필요 없으니까 지움#}
+        {#let user_id = "{{ user.nickname }}";   {#  //#9 하드코딩 -> 동적 적용 #}
+        {#let profile_image = "{{ user.profile_image }}";    {#  //#9 하드코딩 -> 동적 적용 #}
 
         {#//@6 서버로 보내기#}
 
@@ -311,8 +313,10 @@
         fd.append('file', file);
         fd.append('image', image);
         fd.append('content', content);
-        fd.append('user_id', user_id);
-        fd.append('profile_image', profile_image);
+
+        {# //#10-2 피드를 올릴 때, 유저 아이디나 프로필 이미지는 이제 필요 없으니까 지움#}
+        {#fd.append('user_id', user_id);#}
+        {#fd.append('profile_image', profile_image);#}
 
         $.ajax({
             url: "/content/upload",
