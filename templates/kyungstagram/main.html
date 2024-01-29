@@ -184,9 +184,14 @@
                 <div style="margin: 0 20px; display: flex; flex-direction: row; justify-content: space-between">
                     <div>
                         {# 아이콘 집합 1-왼쪽#}
-                        <span class="material-symbols-outlined">favorite</span>
-{#                        <span class="material-symbols-outlined">mode_comment</span>#} {# //#11-1 기능 안 만들 거니까 주석 처리 #}
-{#                        <span class="material-symbols-outlined">send</span>#} {# //#11-1 기능 안 만들 거니까 주석 처리 #}
+                        {# //#11-1 좋아요 눌렀으면 화면 상에서도 체크표시 되도록 #}
+                        {# //#11-2 내가 좋아요 누른 게시물에 하트 표시 되도록 #}
+                        <span id="favorite_{{ feed.id }}" class="favorite material-symbols-outlined" style="color: red">{% if feed.is_liked %}
+                            heart_check{% else %}favorite{% endif %}</span>
+                        {# <span class="material-symbols-outlined">mode_comment</span>#}
+                        {# //#11-1 기능 안 만들 거니까 주석 처리 #}
+                        {# <span class="material-symbols-outlined">send</span>#}
+                        {# //#11-1 기능 안 만들 거니까 주석 처리 #}
                     </div>
                     <div>
                         {# 아이콘 집합 2-오른쪽 #}
@@ -456,6 +461,22 @@
 <!-- 자바스크립트 -->
 {#//@5 제이쿼리 #}
 <script>
+    {# //#11-2 좋아요 기능 - 좋아요 버튼 눌렀을 때 제이쿼리 함수 실행되도록 #}
+    $(".favorite").click(function(event){
+        let favorite_id = event.target.id;  {# 각각의 좋아요 아이디 #}
+        {#console.log(favorite_id);#}
+
+        let favorite_text = $.trim($('#'+favorite_id).html());  {# 좋아요 상태 확인 #}
+        {# 공백 제거 함수 $.trim #}
+        console.log(favorite_text);
+
+        if(favorite_text == 'heart_check'){
+            $('#'+favorite_id).html('favorite');    {# 좋아요 표시가 되어 있다면 -> 빈 하트로 #}
+        }else{
+            $('#'+favorite_id).html('heart_check'); {# 좋아요 표시가 안 되어 있다면 -> 체크 하트로 #}
+        }
+    });
+
     {# //#10-3 댓글 달기 기능 - 클릭한 대상에 대해서 알 수 있어 - 피드 아이디 가져오기 - 형식 갖추도록 모양 만들기 #}
     $(".upload_reply").click(function (event) {
         {#console.log(event.target.attributes.getNamedItem('feed_id').value);#}
@@ -485,7 +506,7 @@
                 alert("댓글 성공");
 
                 {# //#10-3 댓글 작성 성공을 하면, 해당 reply_list_번호에 아래 내용을 추가한다 - 실시간 갱신 #}
-                $("#reply_list_"+feed_id).append("<div style='margin: 0 20px; text-align:left; font-size:16px'><b>{{ user.nickname }}</b> "+ reply_content +"</div>")
+                $("#reply_list_" + feed_id).append("<div style='margin: 0 20px; text-align:left; font-size:16px'><b>{{ user.nickname }}</b> " + reply_content + "</div>")
                 location.replace('/main')
                 {# //#10-3 새로고침 안 해주면, 즉시 갱신이 안 되므로. #}
             },
@@ -494,7 +515,8 @@
             },
             complete: function () {
                 console.log("완료");
-                $('#' + reply_id).val('');  {# //#10-3 댓글 게시한 후에는, 해당 댓글창을 비워준다 #}
+                $('#' + reply_id).val('');
+                {# //#10-3 댓글 게시한 후에는, 해당 댓글창을 비워준다 #}
             }
         });
 
