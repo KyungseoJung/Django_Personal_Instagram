@@ -15,6 +15,20 @@ from Kyungstagram.settings import MEDIA_ROOT  # //@6
 
 class Main(APIView):
     def get(self, request):
+        # //#11-1 email 데이터 끌어올려서 위치 변경 - 처음부터 email 데이터를 확인하도록
+        # //@8 세션 정보 가져와서 확인하기
+        # print('로그인한 사용자: ', request.session['email']) # //#9 있으면 에러 발생하므로
+        # email = request.session['email']
+        # //#9 위 코드: email이 없으면 에러가 나게 되어있으므로, 아래 코드로 변경
+        email = request.session.get('email', None)  # //#9 없으면 에러가 나는 게 아니라, None으로 받도록 변경
+
+        if email is None:
+            return render(request, "user/login.html")  # //@8 유저 이메일 없으면, 로그인부터 하도록 로그인 화면 띄워
+        user = User.objects.filter(email=email).first()  # //@8 고유 데이터인 이메일을 이용해서 로그인 한 사용자의 정보를 가져오기
+
+        if user is None:
+            return render(request, "user/login.html")  # //@8 사용자 정보 없으면, 로그인부터 하도록 로그인 화면 띄워
+
 
         # print("겟으로 호출")
         feed_object_list = Feed.objects.all().order_by(
@@ -28,14 +42,14 @@ class Main(APIView):
 
         for feed in feed_object_list:
 
-            # //#10-1 아래 user로부터 profile_image, nickname 가져오는 부분 자꾸 에러 발생 - 원인: user를 찾지 못해서
-            # //#10-1 내 해결책: feed로부터 user를 찾는 게 아니라, 로그인 한 email로부터 user를 찾아서 email 가져오도록 코드 변경함
-            # //#10-1 변경된 코드 부분: User.objects.filter(email=feed.email).first() -> User.objects.filter(email=email).first()
-            email = request.session.get('email', None)
-            if email is None:
-                return render(request, "user/login.html")
-            user = User.objects.filter(email=email).first()
-            # //#10-1 사용자 고유 데이터(email)를 이용해서 user에 접근 -> 아래 feed_list.append할 때 nickname, profile_image 가져올 수 있도록
+            # # //#10-1 아래 user로부터 profile_image, nickname 가져오는 부분 자꾸 에러 발생 - 원인: user를 찾지 못해서
+            # # //#10-1 내 해결책: feed로부터 user를 찾는 게 아니라, 로그인 한 email로부터 user를 찾아서 email 가져오도록 코드 변경함
+            # # //#10-1 변경된 코드 부분: User.objects.filter(email=feed.email).first() -> User.objects.filter(email=email).first()
+            # email = request.session.get('email', None)
+            # if email is None:
+            #     return render(request, "user/login.html")
+            # user = User.objects.filter(email=email).first()
+            # # //#10-1 사용자 고유 데이터(email)를 이용해서 user에 접근 -> 아래 feed_list.append할 때 nickname, profile_image 가져올 수 있도록
 
             # //#10-2 답글 데이터에 접근하기
             # (#10-1에서 했던 것과 같은 방식)
@@ -47,14 +61,21 @@ class Main(APIView):
                 reply_list.append(dict(reply_content = reply.reply_content,
                                        nickname = user.nickname))
 
+            like_count = Like.objects.filter(feed_id = feed.id, is_like=True).count()
+            # //#11-1 models.py의 Like 클래스에 접근해서 like_count를 가져오더라 - 아래 like_count에 넣어주기
+
+            is_liked = Like.objects.filter(feed_id = feed.id, email=email, is_like = True).exists()
+            # //#11-1 내가 특정 게시물에 좋아요 눌렀는지 확인 - 눌렀으면 true
+
             feed_list.append(dict(id = feed.id,                     # //#10-3 피드 아이디를 main.htlm에서 받을 수 있도록
                                   image=feed.image,
                                   content=feed.content,
-                                  like_count=feed.like_count,
+                                  like_count=like_count,            # //#11-1 데이터 변경 feed.like_count,
                                   profile_image=user.profile_image, # //#10-1
                                   nickname=user.nickname,           # //#10-1
 
-                                  reply_list = reply_list           # //#10-2 답글 데이터도 보이도록
+                                  reply_list = reply_list,          # //#10-2 답글 데이터도 보이도록
+                                  is_liked =is_liked                # //#11-1
                                   ))
 
         # for feed in feed_list:  #@ 피드 하나씩 출력
@@ -63,18 +84,6 @@ class Main(APIView):
         #
         # print(feed_list)  #@ 그냥 통째로 출력한 예
 
-        # //@8 세션 정보 가져와서 확인하기
-        # print('로그인한 사용자: ', request.session['email']) # //#9 있으면 에러 발생하므로
-        # email = request.session['email']
-        # //#9 위 코드: email이 없으면 에러가 나게 되어있으므로, 아래 코드로 변경
-        email = request.session.get('email', None)  # //#9 없으면 에러가 나는 게 아니라, None으로 받도록 변경
-
-        if email is None:
-            return render(request, "user/login.html")  # //@8 유저 이메일 없으면, 로그인부터 하도록 로그인 화면 띄워
-        user = User.objects.filter(email=email).first()  # //@8 고유 데이터인 이메일을 이용해서 로그인 한 사용자의 정보를 가져오기
-
-        if user is None:
-            return render(request, "user/login.html")  # //@8 사용자 정보 없으면, 로그인부터 하도록 로그인 화면 띄워
 
         return render(request, "kyungstagram/main.html",
                       context=dict(feeds=feed_list, user=user))  # @ 키 이름 = 위에서 정의한 데이터 값
@@ -149,3 +158,20 @@ class UploadReply(APIView):
 
         return Response(status=200)
 
+# //#11-1 좋아요 기능 클래스
+class ToggleLike(APIView):
+    def post(self, request):
+
+        feed_id = request.data.get('feed_id', None)
+        is_like = request.data.get('is_like', True)
+
+        if is_like == 'true' or is_like == 'True':   # //#11-1 boolean 변수가 아니라 string으로 받을 것이기 때문에
+            is_like = True
+        else:
+            is_like = False
+
+        email = request.session.get('email', None)
+
+        Like.objects.create(feed_id=feed_id, is_like = is_like, email=email)
+
+        return Response(status=200)
