@@ -1,6 +1,6 @@
 # //@7 urls.py도 앱별로 나눠서 정리
 from django.urls import path
-from .views import UploadFeed, Profile, Main, UploadReply, ToggleLike
+from .views import UploadFeed, Profile, Main, UploadReply, ToggleLike, ToggleBookmark
 
 
 urlpatterns = [
@@ -13,6 +13,9 @@ urlpatterns = [
 
     path('like', ToggleLike.as_view()),
     # //#11-4 좋아요 다는 기능
+
+    path('bookmark', ToggleBookmark.as_view()),
+    # //#11-5 북마크 다는 기능
 
     path('profile', Profile.as_view()),
     # //#9 user/profile 링크로 접속하면, 자동으로 .views 파일의 Profile 클래스 실행되도록

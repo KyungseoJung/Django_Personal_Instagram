@@ -187,8 +187,15 @@
                         {# //#11-1 좋아요 눌렀으면 화면 상에서도 체크표시 되도록 #}
                         {# //#11-2 내가 좋아요 누른 게시물에 하트 표시 되도록 #}
                         {# //#11-4 좋아요 누르면 - 실제 데이터를 DB로 넘기기 - feed_id 설정 #}
-                        <span id="favorite_{{ feed.id }}" feed_id="{{ feed.id }}" class="favorite material-symbols-outlined" style="color: red; cursor: pointer">{% if feed.is_liked %}
-                            heart_check{% else %}favorite{% endif %}</span>
+                        <span id="favorite_{{ feed.id }}" feed_id="{{ feed.id }}"
+                              class="favorite material-symbols-outlined"
+                              style="color: red; cursor: pointer">
+                            {% if feed.is_liked %}
+                                heart_check
+                            {% else %}
+                                favorite
+                            {% endif %}
+                        </span>
                         {# <span class="material-symbols-outlined">mode_comment</span>#}
                         {# //#11-1 기능 안 만들 거니까 주석 처리 #}
                         {# <span class="material-symbols-outlined">send</span>#}
@@ -196,7 +203,15 @@
                     </div>
                     <div>
                         {# 아이콘 집합 2-오른쪽 #}
-                        <span class="material-symbols-outlined">bookmark</span>
+                        {# //#11-5 북마크 기능 - 좋아요랑 똑같이 적용 #}
+                        <span id="bookmark_{{ feed.id }}" feed_id="{{ feed.id }}"
+                              class="bookmark material-symbols-outlined" style="cursor: pointer">
+                            {% if feed.is_marked %}
+                                bookmark_added
+                            {% else %}
+                                bookmark
+                            {% endif %}
+                        </span>
                     </div>
                 </div>
                 <div style="margin: 0 20px; text-align: left; font-size: 14px"> 춘식이 <b>외 {{ feed.like_count }}명</b>이
@@ -462,22 +477,72 @@
 <!-- 자바스크립트 -->
 {#//@5 제이쿼리 #}
 <script>
+
+    {# //#11-5 북마크 기능 - 북마크 버튼 눌렀을 때 제이쿼리 함수 실행되도록 #}
+    $(".bookmark").click(function (event) {
+        let feed_id = event.target.attributes.getNamedItem('feed_id').value;
+        {# //#11-4 좋아요 누르면 - 실제 데이터 DB로 보내기 - feed_id랑 favorite_text 보내기 #}
+
+
+        let bookmark_id = event.target.id;
+        {# 각각의 좋아요 아이디 #}
+        {#console.log(bookmark_id);#}
+
+        let bookmark_text = $.trim($('#' + bookmark_id).html());
+        {# 좋아요 상태 확인 #}
+        {# 공백 제거 함수 $.trim #}
+        console.log(bookmark_text);
+
+        if (bookmark_text == 'bookmark_added') {
+            $('#' + bookmark_id).html('bookmark');
+            {# 북마크 표시가 되어 있다면 -> 북마크 하기 전 아이콘 #}
+        } else {
+            $('#' + bookmark_id).html('bookmark_added');
+            {# 북마크 표시가 안 되어 있다면 -> 체크 북마크로 #}
+        }
+
+        {# //#11-4 ajax 함수: 좋아요 누르면 - 실제 데이터 DB로 보내기 - feed_id랑 is_like 보내기 #}
+        $.ajax({
+            url: "/content/bookmark",
+            data: {
+                feed_id: feed_id,
+                bookmark_text: bookmark_text,
+            },
+            method: "POST",
+            success: function (data) {
+                console.log("성공");
+            },
+            error: function (request, status, error) {
+                console.log("에러");
+            },
+            complete: function () {
+                console.log("완료");
+            }
+        });
+    });
+
+
     {# //#11-2 좋아요 기능 - 좋아요 버튼 눌렀을 때 제이쿼리 함수 실행되도록 #}
-    $(".favorite").click(function(event){
-        let feed_id = event.target.attributes.getNamedItem('feed_id').value;    {# //#11-4 좋아요 누르면 - 실제 데이터 DB로 보내기 - feed_id랑 favorite_text 보내기 #}
+    $(".favorite").click(function (event) {
+        let feed_id = event.target.attributes.getNamedItem('feed_id').value;
+        {# //#11-4 좋아요 누르면 - 실제 데이터 DB로 보내기 - feed_id랑 favorite_text 보내기 #}
 
 
-        let favorite_id = event.target.id;  {# 각각의 좋아요 아이디 #}
+        let favorite_id = event.target.id;
+        {# 각각의 좋아요 아이디 #}
         {#console.log(favorite_id);#}
 
-        let favorite_text = $.trim($('#'+favorite_id).html());  {# 좋아요 상태 확인 #}
+        let favorite_text = $.trim($('#' + favorite_id).html());
+        {# 좋아요 상태 확인 #}
         {# 공백 제거 함수 $.trim #}
         console.log(favorite_text);
 
-        if(favorite_text == 'heart_check'){
-            $('#'+favorite_id).html('favorite');    {# 좋아요 표시가 되어 있다면 -> 빈 하트로 #}
-        }else{
-            $('#'+favorite_id).html('heart_check'); {# 좋아요 표시가 안 되어 있다면 -> 체크 하트로 #}
+        if (favorite_text == 'heart_check') {
+            $('#' + favorite_id).html('favorite');
+            {# 좋아요 표시가 되어 있다면 -> 빈 하트로 #}
+        } else {
+            $('#' + favorite_id).html('heart_check');
+            {# 좋아요 표시가 안 되어 있다면 -> 체크 하트로 #}
         }
 
         {# //#11-4 ajax 함수: 좋아요 누르면 - 실제 데이터 DB로 보내기 - feed_id랑 is_like 보내기 #}

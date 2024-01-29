@@ -67,6 +67,9 @@ class Main(APIView):
             is_liked = Like.objects.filter(feed_id = feed.id, email=email, is_like = True).exists()
             # //#11-1 내가 특정 게시물에 좋아요 눌렀는지 확인 - 눌렀으면 true
 
+            is_marked = Bookmark.objects.filter(feed_id = feed.id, email = email, is_marked = True).exists()
+            # //#11-5 내가 특정 게시물에 북마크 눌렀는지 확인 - 눌렀으면 true
+
             feed_list.append(dict(id = feed.id,                     # //#10-3 피드 아이디를 main.htlm에서 받을 수 있도록
                                   image=feed.image,
                                   content=feed.content,
@@ -75,7 +78,8 @@ class Main(APIView):
                                   nickname=user.nickname,           # //#10-1
 
                                   reply_list = reply_list,          # //#10-2 답글 데이터도 보이도록
-                                  is_liked =is_liked                # //#11-1
+                                  is_liked =is_liked,               # //#11-1
+                                  is_marked = is_marked             # //#11-5 북마크 정보도 보내도록
                                   ))
 
         # for feed in feed_list:  #@ 피드 하나씩 출력
@@ -177,9 +181,36 @@ class ToggleLike(APIView):
         # //#11-4 이미 특정 유저가 같은 게시물에 좋아요를 2번 이상 눌렀다면, 가장 최신 데이터로 저장을 한다.
         like = Like.objects.filter(feed_id=feed_id, email=email).first()
         if like:
-            like.is_like = is_like
+            like.is_like = is_like  # 위의 if문에서 업데이트 한 is_like
             like.save()
         else:
             Like.objects.create(feed_id=feed_id, is_like=is_like, email=email)  # //#11-4 없으면 좋아요 추가
 
         return Response(status=200)
+
+
+# //#11-5 북마크 기능 클래스
+class ToggleBookmark(APIView):
+    def post(self, request):
+
+        feed_id = request.data.get('feed_id', None)
+        bookmark_text = request.data.get('bookmark_text', True)
+
+        if bookmark_text == 'bookmark':   # //#11-1 boolean 변수가 아니라 string으로 받을 것이기 때문에
+            is_marked = True
+        else:
+            is_marked = False
+
+        email = request.session.get('email', None)
+
+        # //#11-4 이미 좋아요가 있는지 확인 - 좋아요는 한 사람당 하나씩만 달 수 있기 때문
+        # //#11-4 이미 특정 유저가 같은 게시물에 좋아요를 2번 이상 눌렀다면, 가장 최신 데이터로 저장을 한다.
+        bookmark = Bookmark.objects.filter(feed_id=feed_id, email=email).first()
+        if bookmark:
+            bookmark.is_marked = is_marked  # 위의 if문에서 업데이트 한 is_marked
+            bookmark.save()
+        else:
+            Bookmark.objects.create(feed_id=feed_id, is_marked=is_marked, email=email)  # //#11-4 없으면 좋아요 추가
+
+        return Response(status=200)
+
