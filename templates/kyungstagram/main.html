@@ -186,7 +186,7 @@
                         {# 아이콘 집합 1-왼쪽#}
                         {# //#11-1 좋아요 눌렀으면 화면 상에서도 체크표시 되도록 #}
                         {# //#11-2 내가 좋아요 누른 게시물에 하트 표시 되도록 #}
-                        <span id="favorite_{{ feed.id }}" class="favorite material-symbols-outlined" style="color: red">{% if feed.is_liked %}
+                        <span id="favorite_{{ feed.id }}" class="favorite material-symbols-outlined" style="color: red; cursor: pointer">{% if feed.is_liked %}
                             heart_check{% else %}favorite{% endif %}</span>
                         {# <span class="material-symbols-outlined">mode_comment</span>#}
                         {# //#11-1 기능 안 만들 거니까 주석 처리 #}
