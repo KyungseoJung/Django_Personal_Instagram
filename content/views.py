@@ -163,15 +163,23 @@ class ToggleLike(APIView):
     def post(self, request):
 
         feed_id = request.data.get('feed_id', None)
-        is_like = request.data.get('is_like', True)
+        favorite_text = request.data.get('favorite_text', True)
 
-        if is_like == 'true' or is_like == 'True':   # //#11-1 boolean 변수가 아니라 string으로 받을 것이기 때문에
+        # //#11-4 빈 하트일 때, 좋아요를 누른 거면 is_like = True(좋아요=True)인 거니까 DB에 좋아요 넣기
+        if favorite_text == 'favorite':   # //#11-1 boolean 변수가 아니라 string으로 받을 것이기 때문에
             is_like = True
         else:
             is_like = False
 
         email = request.session.get('email', None)
 
-        Like.objects.create(feed_id=feed_id, is_like = is_like, email=email)
+        # //#11-4 이미 좋아요가 있는지 확인 - 좋아요는 한 사람당 하나씩만 달 수 있기 때문
+        # //#11-4 이미 특정 유저가 같은 게시물에 좋아요를 2번 이상 눌렀다면, 가장 최신 데이터로 저장을 한다.
+        like = Like.objects.filter(feed_id=feed_id, email=email).first()
+        if like:
+            like.is_like = is_like
+            like.save()
+        else:
+            Like.objects.create(feed_id=feed_id, is_like=is_like, email=email)  # //#11-4 없으면 좋아요 추가
 
         return Response(status=200)

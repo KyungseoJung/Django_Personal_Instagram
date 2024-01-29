@@ -186,7 +186,8 @@
                         {# 아이콘 집합 1-왼쪽#}
                         {# //#11-1 좋아요 눌렀으면 화면 상에서도 체크표시 되도록 #}
                         {# //#11-2 내가 좋아요 누른 게시물에 하트 표시 되도록 #}
-                        <span id="favorite_{{ feed.id }}" class="favorite material-symbols-outlined" style="color: red; cursor: pointer">{% if feed.is_liked %}
+                        {# //#11-4 좋아요 누르면 - 실제 데이터를 DB로 넘기기 - feed_id 설정 #}
+                        <span id="favorite_{{ feed.id }}" feed_id="{{ feed.id }}" class="favorite material-symbols-outlined" style="color: red; cursor: pointer">{% if feed.is_liked %}
                             heart_check{% else %}favorite{% endif %}</span>
                         {# <span class="material-symbols-outlined">mode_comment</span>#}
                         {# //#11-1 기능 안 만들 거니까 주석 처리 #}
@@ -463,6 +464,9 @@
 <script>
     {# //#11-2 좋아요 기능 - 좋아요 버튼 눌렀을 때 제이쿼리 함수 실행되도록 #}
     $(".favorite").click(function(event){
+        let feed_id = event.target.attributes.getNamedItem('feed_id').value;    {# //#11-4 좋아요 누르면 - 실제 데이터 DB로 보내기 - feed_id랑 favorite_text 보내기 #}
+
+
         let favorite_id = event.target.id;  {# 각각의 좋아요 아이디 #}
         {#console.log(favorite_id);#}
 
@@ -475,6 +479,25 @@
         }else{
             $('#'+favorite_id).html('heart_check'); {# 좋아요 표시가 안 되어 있다면 -> 체크 하트로 #}
         }
+
+        {# //#11-4 ajax 함수: 좋아요 누르면 - 실제 데이터 DB로 보내기 - feed_id랑 is_like 보내기 #}
+        $.ajax({
+            url: "/content/like",
+            data: {
+                feed_id: feed_id,
+                favorite_text: favorite_text,
+            },
+            method: "POST",
+            success: function (data) {
+                console.log("성공");
+            },
+            error: function (request, status, error) {
+                console.log("에러");
+            },
+            complete: function () {
+                console.log("완료");
+            }
+        });
     });
 
     {# //#10-3 댓글 달기 기능 - 클릭한 대상에 대해서 알 수 있어 - 피드 아이디 가져오기 - 형식 갖추도록 모양 만들기 #}
@@ -519,7 +542,6 @@
                 {# //#10-3 댓글 게시한 후에는, 해당 댓글창을 비워준다 #}
             }
         });
-
 
     });
 

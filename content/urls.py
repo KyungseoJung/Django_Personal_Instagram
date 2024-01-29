@@ -1,6 +1,6 @@
 # //@7 urls.py도 앱별로 나눠서 정리
 from django.urls import path
-from .views import UploadFeed, Profile, Main, UploadReply
+from .views import UploadFeed, Profile, Main, UploadReply, ToggleLike
 
 
 urlpatterns = [
@@ -10,6 +10,9 @@ urlpatterns = [
     path('reply', UploadReply.as_view()),
     # //#10-3 답글 다는 기능:
     # //#10-3 content/reply 링크로 접속하면, 자동으로 .views 파일의 Reply 클래스 실행되도록
+
+    path('like', ToggleLike.as_view()),
+    # //#11-4 좋아요 다는 기능
 
     path('profile', Profile.as_view()),
     # //#9 user/profile 링크로 접속하면, 자동으로 .views 파일의 Profile 클래스 실행되도록
