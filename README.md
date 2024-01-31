@@ -1,6 +1,4 @@
-# 인스타그램 클론 코딩 with Django
-
-<h4 align='center'> 인스타그램 클론 코딩 </h4>
+<h4 align='center'> 인스타그램 클론 코딩 with Django </h4>
 
 <h1 align='center'> 웹 개발 프로젝트 </h1>
 
