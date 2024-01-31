@@ -122,7 +122,7 @@ class UploadFeed(APIView):
         # //#10 사실 email을 받을 필요도 없음. 세션에 저장된 정보를 바로 가져오면 됨.(로그인을 하면서 email을 입력받았을테니까)
         email = request.session.get('email', None)
 
-        Feed.objects.create(image=image, content=content, email=email, like_count=0)
+        Feed.objects.create(image=image, content=content, email=email)   # , like_count=0)  # //#11 전에 like_count는 이제 안 받기로 했으므로 여기서도 제거
 
         # response: Alt + Enter 눌러서 import하기
         return Response(status=200)
@@ -144,7 +144,22 @@ class Profile(APIView):
 
         # //#9 여기까지 위 email(사용자 공유 정보)를 불러와줘서 아래처럼 context=dict(user=user)를 통해 사용자 정보를 넘기는 것
 
-        return render(request, 'content/profile.html', context=dict(user=user))
+        # //#11-6 여기부터: 3가지 피드 리스트를 가져와: 내 피드 리스트, 내가 좋아요 한 피드 리스트, 내가 북마크 한 피드 리스트
+        feed_list = Feed.objects.filter(email=email).all()
+
+        like_list = list(Like.objects.filter(email=email, is_like=True).values_list('feed_id', flat=True))    # 내가 '좋아요' 한 컨텐츠의 리스트
+        # print(like_list) # value_list와 flat=True로 주면, 오브젝트가 쿼리 리스트로 나옴. 거기에 list로 1번 더 감싸면 순수 리스트 형태로만 나옴
+        like_feed_list = Feed.objects.filter(id__in=like_list)   # 내가 '좋아요'한 피드의 리스트. 그 리스트의 아이디만 가져온 것
+            # @중요!! id__in 의미: Feed에 있는 id 주에 like_list를 포함하고 있는 애만 걸러내는 역할
+        bookmark_list = list(Bookmark.objects.filter(email=email, is_marked=True).values_list('feed_id', flat=True))
+        bookmark_feed_list = Feed.objects.filter(id__in=bookmark_list)
+        
+        # //#11-6 여기까지
+
+        return render(request, 'content/profile.html', context=dict(feed_list = feed_list,
+                                                                                 like_feed_list = like_feed_list,
+                                                                                 bookmark_feed_list = bookmark_feed_list,
+                                                                                 user=user))
 
 
 # //#10-2 댓글 달기 클래스

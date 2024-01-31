@@ -185,6 +185,36 @@
 
 </div>
 
+{# //#11-6 내 프로필 - 북마크 리스트만 보여주기 #}
+<div style="border-top: solid 2px rgba(200, 200, 200, 1); width: 100%">
+    <div style="display: flex; flex-direction: row; justify-content: center; margin: 20px">
+        <div style="margin: 0 30px; display: flex; flex-direction: row; align-items: center"><span
+                class="material-symbols-outlined">grid_on</span> 내 게시물
+        </div>
+        <div style="margin: 0 30px; display: flex; flex-direction: row; align-items: center"><span
+                class="material-symbols-outlined">favorite</span> 좋아요
+        </div>
+        <div style="margin: 0 30px; display: flex; flex-direction: row; align-items: center"><span
+                class="material-symbols-outlined">bookmark</span> 북마크
+        </div>
+    </div>
+</div>
+
+<div style="width: 100%; min-width: 1000px; display: flex; align-items: center; justify-content: center;">
+    <div style="display: flex; flex-direction: row; flex-wrap: wrap; width: 1000px; justify-content: center">
+        {# //#11-6 특정 피드들 - 내 프로필에 보이게 하기 (이미지만 보이도록) #}
+        {% for feed in feed_list %}
+            <div style="width: 300px; height: 300px; margin: 10px 5px 0px 5px">
+                {# 피드 이미지#}
+                <div><img style="width: 300px; height: 300px; object-fit: cover"
+                          src="{% get_media_prefix %}{{ feed.image }}">
+                </div>
+            </div>
+
+        {% endfor %}
+    </div>
+</div>
+
 
 <!-- //@5 모달 만들기 - 평소엔 숨어있음 -->
 
